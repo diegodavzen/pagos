@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Credit Card Payment</title>
+    <style>
+        .success {
+            color: green;
+        }
+        .failure {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Credit Card Payment</h1>
+    <form id="paymentForm">
+        <label for="cardNumber">Card Number:</label>
+        <input type="text" id="cardNumber" required><br>
+
+        <label for="expiryMonth">Expiry Month:</label>
+        <input type="text" id="expiryMonth" required><br>
+
+        <label for="expiryYear">Expiry Year:</label>
+        <input type="text" id="expiryYear" required><br>
+
+        <label for="cw">CW:</label>
+        <input type="text" id="cw" required><br>
+
+        <input type="submit" value="Submit">
+    </form>
+
+    <div id="validationResult"></div>
+
+    <script>
+        document.getElementById("paymentForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            // Gather the credit card information from the form
+            var cardNumber = document.getElementById("cardNumber").value;
+            var expiryMonth = document.getElementById("expiryMonth").value;
+            var expiryYear = document.getElementById("expiryYear").value;
+            var cw = document.getElementById("cw").value;
+
+            // Send the credit card information to the backend API for validation
+            fetch("/api/validate-credit-card/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: "card_number=" + encodeURIComponent(cardNumber) +
+                      "&expiry_month=" + encodeURIComponent(expiryMonth) +
+                      "&expiry_year=" + encodeURIComponent(expiryYear) +
+                      "&cw=" + encodeURIComponent(cw)
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                // Process the validation response
+                if (data.valid) {
+                    document.getElementById("validationResult").innerHTML = '<span class="success">Payment Successful!</span>';
+                } else {
+                    document.getElementById("validationResult").innerHTML = '<span class="failure">Payment Failed!</span>';
+                }
+            })
+            .catch(function(error) {
+                console.log(error);
+
+            });
+        });
+    </script>
+</body>
+</html>
